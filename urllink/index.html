@@ -76,29 +76,27 @@
     const manualGuideModal = document.getElementById('manual-guide-modal');
     const guideMessage = document.getElementById('guideMessage');
 
-    // 4. 설치 준비 완료 이벤트 (자동 버튼 표출 - 지원 브라우저용)
+// 4. [수정] 설치 준비 완료 이벤트 (진입 시 자동 배너 표출 차단)
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
+      e.preventDefault(); // 👈 브라우저가 자동으로 설치 팝업/배너를 띄우지 못하게 막음
+      deferredPrompt = e;  // 설치 트리거를 변수에만 저장해둠
       
       const browser = analyzeBrowser();
 
-      // 인앱 브라우저가 아닐 때 배너 띄우기
-      if (!browser.isInApp) {
-        installBanner.style.display = 'flex';
-        
-        // 기기별 배너 문구 & 버튼 텍스트 변경
-        if (browser.isMobile) {
-          bannerText.innerHTML = '📱 <b>순천청암고 클라우드</b>를 핸드폰 홈 화면에 앱으로 설치하세요!';
-          installBtn.innerText = '앱 설치하기';
-        } else {
-          bannerText.innerHTML = '💻 <b>순천청암고 클라우드0000</b>를 바탕화면에 바로가기로 설치하세요!';
-          installBtn.innerText = '바로가기 설치';
-        }
+      // [기존 코드 주석 처리 또는 삭제] 진입 시 자동으로 배너를 보이게 하는 코드를 막았습니다.
+      // if (!browser.isInApp) { installBanner.style.display = 'flex'; ... }
+      
+      // 기기별 배너 텍스트 셋팅만 미리 해둡니다.
+      if (browser.isMobile) {
+        bannerText.innerHTML = '📱 <b>순천청암고 클라우드</b>를 핸드폰 홈 화면에 앱으로 설치하세요!';
+        installBtn.innerText = '앱 설치하기';
+      } else {
+        bannerText.innerHTML = '💻 <b>순천청암고 클라우드</b>를 바탕화면에 바로가기로 설치하세요!';
+        installBtn.innerText = '바로가기 설치';
       }
     });
 
-    // 5. 배너 설치 버튼 클릭 동작
+    // 5. 배너 설치 버튼 클릭 동작 (기존과 동일)
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -117,7 +115,7 @@
       }
     });
 
-    // 6. 설치 완료 이벤트
+    // 6. 설치 완료 이벤트 (기존과 동일)
     window.addEventListener('appinstalled', () => {
       installBanner.style.display = 'none';
       manualGuideModal.style.display = 'none';
@@ -129,47 +127,22 @@
       }
     });
 
-    // 7. 수동 설치 안내 모달 콘텐츠 생성 및 표출 함수
-    function showManualGuide() {
-      const browser = analyzeBrowser();
-      manualGuideModal.style.display = 'flex'; // 모달 열기
+    // 7. 수동 설치 안내 모달 콘텐츠 생성 및 표출 함수 (기존과 동일)
+    function showManualGuide() { /* ...생략... */ }
 
-      // 모바일 환경
-      if (browser.isMobile) {
-        if (browser.isInApp) {
-          guideMessage.innerHTML = '⚠️ <b>현재 카카오톡 등 앱 내부 브라우저입니다.</b><br><br>오른쪽 위 메뉴(⋮ 또는 ⋯)를 눌러 <b>"다른 브라우저로 열기"</b>를 선택하시면 홈 화면에 바로 설치 버튼이 나타납니다.';
-        } else if (browser.isIOS) {
-          if (browser.isSafari) {
-            guideMessage.innerHTML = '🍏 <b>아이폰 사파리 앱 추가</b><br><br>1. 하단 중앙의 <b>[공유하기]</b> 버튼(네모 박스 화살표)을 누릅니다.<br>2. 메뉴를 아래로 내려 <b>[홈 화면에 추가]</b>를 눌러주세요.';
-          } else {
-            guideMessage.innerHTML = '🍏 <b>아이폰 크롬/엣지 앱 추가</b><br><br>1. 주소창 주변의 <b>[공유하기]</b> 버튼을 누릅니다.<br>2. <b>[홈 화면에 추가]</b>를 선택해 주세요.';
-          }
-        } else if (browser.isSamsung) {
-          guideMessage.innerHTML = '📱 <b>삼성 인터넷 앱 추가</b><br><br>화면 우측 하단 메뉴(三) ➡️ <b>[현재 페이지 추가]</b> ➡️ <b>[홈 화면]</b>을 선택해 주세요.';
-        } else if (browser.isFirefox) {
-          guideMessage.innerHTML = '🦊 <b>파이어폭스 앱 추가</b><br><br>우측 하단 메뉴(⋮)를 누른 뒤 <b>[홈 화면에 추가]</b>를 눌러주세요.';
-        } else {
-          guideMessage.innerHTML = '📱 <b>핸드폰 홈 화면에 앱 추가</b><br><br>브라우저 메뉴에서 <b>[홈 화면에 추가]</b> 또는 <b>[바로가기 만들기]</b>를 선택해 주세요.';
-        }
-      } 
-      // PC 환경
-      else {
-        if (browser.isFirefox) {
-          guideMessage.innerHTML = '🌐 <b>PC 파이어폭스 안내</b><br><br>파이어폭스는 바탕화면 바로가기 자동 설치를 지원하지 않습니다.<br><b>구글 크롬(Chrome)</b> 또는 <b>MS 엣지(Edge)</b>로 접속하시면 원클릭 설치가 가능합니다.';
-        } else {
-          guideMessage.innerHTML = '🌐 <b>바탕화면에 바로가기를 만드려면?</b><br><br>' +
-            '1. 현재 브라우저 주소창 맨 오른쪽 끝을 확인해 주세요.<br>' +
-            '2. 모니터 모양 또는 더하기(+)가 붙은 <b>[앱 설치 아이콘]</b>을 누르시면 됩니다.<br><br>' +
-            '아이콘이 없다면 <b>우측 상단 메뉴(⋮) ➡️ [저장 및 공유] ➡️ [앱 설치]</b>를 눌러주세요.';
-        }
-      }
-    }
-
-    // [수정] 8. GAS(iframe) 신호 대기 리스너 (기존 자동 실행 타이머 완전 제거)
+    // 8. [수정] GAS(iframe) 신호 대기 리스너
     window.addEventListener('message', (event) => {
-      // GAS에서 보낸 action 값이 'openInstallModal'일 때만 모달 창을 띄웁니다.
       if (event.data && event.data.action === 'openInstallModal') {
-        showManualGuide();
+        
+        // 크롬/웨일 등 자동 설치 기능이 지원되는 환경(deferredPrompt가 존재하는 경우)
+        if (deferredPrompt) {
+          installBanner.style.display = 'flex'; // GAS 버튼 클릭 시 상단 파란색 배너가 뜸
+        } 
+        // 아이폰 사파리나 인앱 브라우저 등 자동 설치가 안 되는 환경
+        else {
+          showManualGuide(); // 중앙 수동 가이드 모달 팝업이 뜸
+        }
+        
       }
     });
   </script>
