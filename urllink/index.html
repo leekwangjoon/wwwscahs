@@ -11,29 +11,85 @@
     /* 구글 웹앱 주소 프레임 */
     #gas-frame { width: 100%; height: 100%; border: none; display: block; }
 
-    /* 자동 설치 알림 배너 */
-    #install-banner { position: fixed; top: 0; left: 0; width: 100%; background: #4A90E2; color: white; padding: 12px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; z-index: 99999; justify-content: center; align-items: center; gap: 20px; font-family: sans-serif; font-size: 15px; box-sizing: border-box; }
-    #install-btn { background: white; color: #4A90E2; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap; transition: 0.2s; }
-    #install-btn:hover { background: #f1f1f1; }
+    /* 팝업 모달 공통 배경 (어두운 반투명 배경 및 상하좌우 중앙 정렬) */
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.5); 
+      z-index: 99999; 
+      display: none; /* 기본 숨김 */
+      justify-content: center; 
+      align-items: center; 
+      padding: 20px; 
+      box-sizing: border-box; 
+      backdrop-filter: blur(3px); 
+      font-family: sans-serif; 
+    }
 
-    /* 수동 설치 안내 모달 (플로팅 팝업) */
-    #manual-guide-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(2px); font-family: sans-serif; }
-    .modal-content { background: white; padding: 25px; border-radius: 16px; max-width: 400px; width: 100%; line-height: 1.6; font-size: 15px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    /* 모달 본체 박스 (크기 조정 및 반응형 디자인) */
+    .modal-content { 
+      background: white; 
+      padding: 30px; 
+      border-radius: 20px; 
+      max-width: 420px; /* PC 환경 크기 제한 */
+      width: 100%;       /* 모바일 반응형 100% */
+      box-sizing: border-box;
+      text-align: center;
+      line-height: 1.6; 
+      font-size: 15px; 
+      color: #333; 
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+      animation: modalFadeIn 0.3s ease-out; /* 부드러운 등장 효과 */
+    }
+
+    /* 팝업 등장 애니메이션 */
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .modal-content b { color: #4A90E2; }
-    .close-modal-btn { display: block; width: 100%; margin-top: 20px; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+
+    /* 버튼 공통 스타일 */
+    .modal-btn { 
+      display: block; 
+      width: 100%; 
+      margin-top: 12px; 
+      padding: 14px; 
+      border: none; 
+      border-radius: 10px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      font-size: 15px; 
+      transition: background 0.2s;
+    }
+
+    /* 설치 진행 버튼 (파란색) */
+    .action-btn { background: #4A90E2; color: white; }
+    .action-btn:hover { background: #357ABD; }
+
+    /* 닫기/취소 버튼 (회색) */
+    .close-btn { background: #e9ecef; color: #495057; margin-top: 8px; }
+    .close-btn:hover { background: #dee2e6; }
   </style>
 </head>
 <body>
 
-  <div id="install-banner">
-    <span id="banner-text">🖥️ <b>순천청암고 클라우드</b>를 설치하여 편리하게 이용해 보세요!</span>
-    <button id="install-btn">지금 설치하기</button>
+  <div id="install-banner" class="modal-overlay">
+    <div class="modal-content">
+      <p id="banner-text" style="margin: 0 0 20px 0; font-size: 16px;"></p>
+      <button id="install-btn" class="modal-btn action-btn">지금 설치하기</button>
+      <button class="modal-btn close-btn" onclick="document.getElementById('install-banner').style.display='none'">다음에 하기</button>
+    </div>
   </div>
 
-  <div id="manual-guide-modal">
+  <div id="manual-guide-modal" class="modal-overlay">
     <div class="modal-content">
-      <p id="guideMessage" style="margin: 0;"></p>
-      <button class="close-modal-btn" onclick="document.getElementById('manual-guide-modal').style.display='none'">확인 후 닫기</button>
+      <p id="guideMessage" style="margin: 0; text-align: left;"></p>
+      <button class="modal-btn close-btn" onclick="document.getElementById('manual-guide-modal').style.display='none'">확인 후 닫기</button>
     </div>
   </div>
 
@@ -76,27 +132,24 @@
     const manualGuideModal = document.getElementById('manual-guide-modal');
     const guideMessage = document.getElementById('guideMessage');
 
-// 4. [수정] 설치 준비 완료 이벤트 (진입 시 자동 배너 표출 차단)
+    // 4. 설치 준비 완료 이벤트 (최초 진입 시 자동 팝업 차단 및 텍스트 빌드만 수행)
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); // 👈 브라우저가 자동으로 설치 팝업/배너를 띄우지 못하게 막음
-      deferredPrompt = e;  // 설치 트리거를 변수에만 저장해둠
+      e.preventDefault(); // 브라우저 자동 배너 차단
+      deferredPrompt = e;  // 트리거 변수 저장
       
       const browser = analyzeBrowser();
 
-      // [기존 코드 주석 처리 또는 삭제] 진입 시 자동으로 배너를 보이게 하는 코드를 막았습니다.
-      // if (!browser.isInApp) { installBanner.style.display = 'flex'; ... }
-      
-      // 기기별 배너 텍스트 셋팅만 미리 해둡니다.
+      // 기기별 알맞은 텍스트 지정 (노출은 하지 않고 대기)
       if (browser.isMobile) {
-        bannerText.innerHTML = '📱 <b>순천청암고 클라우드</b>를 핸드폰 홈 화면에 앱으로 설치하세요!';
+        bannerText.innerHTML = '📱 <b>순천청암고 클라우드</b>를<br>핸드폰 홈 화면에 앱으로 설치하세요!';
         installBtn.innerText = '앱 설치하기';
       } else {
-        bannerText.innerHTML = '💻 <b>순천청암고 클라우드</b>를 바탕화면에 바로가기로 설치하세요!';
+        bannerText.innerHTML = '💻 <b>순천청암고 클라우드</b>를<br>바탕화면에 바로가기로 설치하세요!';
         installBtn.innerText = '바로가기 설치';
       }
     });
 
-    // 5. 배너 설치 버튼 클릭 동작 (기존과 동일)
+    // 5. 자동 설치 모달 내 [지금 설치하기] 버튼 클릭 동작
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -115,7 +168,7 @@
       }
     });
 
-    // 6. 설치 완료 이벤트 (기존과 동일)
+    // 6. 설치 완료 이벤트
     window.addEventListener('appinstalled', () => {
       installBanner.style.display = 'none';
       manualGuideModal.style.display = 'none';
@@ -127,20 +180,53 @@
       }
     });
 
-    // 7. 수동 설치 안내 모달 콘텐츠 생성 및 표출 함수 (기존과 동일)
-    function showManualGuide() { /* ...생략... */ }
+    // 7. 수동 설치 안내 모달 콘텐츠 생성 및 표출 함수
+    function showManualGuide() {
+      const browser = analyzeBrowser();
+      manualGuideModal.style.display = 'flex'; // 중앙 정렬로 오픈
 
-    // 8. [수정] GAS(iframe) 신호 대기 리스너
+      // 모바일 환경 수동 안내 문구
+      if (browser.isMobile) {
+        if (browser.isInApp) {
+          guideMessage.innerHTML = '⚠️ <b>현재 인앱 브라우저 환경입니다.</b><br><br>오른쪽 위 메뉴(⋮ 또는 ⋯)를 눌러 <b>"다른 브라우저로 열기"</b>를 선택하시면 홈 화면에 바로 설치 창이 나타납니다.';
+        } else if (browser.isIOS) {
+          if (browser.isSafari) {
+            guideMessage.innerHTML = '🍏 <b>아이폰 사파리 앱 추가</b><br><br>1. 하단 중앙의 <b>[공유하기]</b> 버튼(네모 박스 화살표)을 누릅니다.<br>2. 메뉴를 아래로 내려 <b>[홈 화면에 추가]</b>를 눌러주세요.';
+          } else {
+            guideMessage.innerHTML = '🍏 <b>아이폰 크롬/엣지 앱 추가</b><br><br>1. 주소창 주변의 <b>[공유하기]</b> 버튼을 누릅니다.<br>2. <b>[홈 화면에 추가]</b>를 선택해 주세요.';
+          }
+        } else if (browser.isSamsung) {
+          guideMessage.innerHTML = '📱 <b>삼성 인터넷 앱 추가</b><br><br>화면 우측 하단 메뉴(三) ➡️ <b>[현재 페이지 추가]</b> ➡️ <b>[홈 화면]</b>을 선택해 주세요.';
+        } else if (browser.isFirefox) {
+          guideMessage.innerHTML = '🦊 <b>파이어폭스 앱 추가</b><br><br>우측 하단 메뉴(⋮)를 누른 뒤 <b>[홈 화면에 추가]</b>를 눌러주세요.';
+        } else {
+          guideMessage.innerHTML = '📱 <b>핸드폰 홈 화면에 앱 추가</b><br><br>브라우저 메뉴에서 <b>[홈 화면에 추가]</b> 또는 <b>[바로가기 만들기]</b>를 선택해 주세요.';
+        }
+      } 
+      // PC 환경 수동 안내 문구
+      else {
+        if (browser.isFirefox) {
+          guideMessage.innerHTML = '🌐 <b>PC 파이어폭스 안내</b><br><br>파이어폭스는 바탕화면 바로가기 자동 설치를 지원하지 않습니다.<br><b>구글 크롬(Chrome)</b> 또는 <b>MS 엣지(Edge)</b>로 접속하시면 원클릭 설치가 가능합니다.';
+        } else {
+          guideMessage.innerHTML = '🌐 <b>바탕화면에 바로가기를 만드려면?</b><br><br>' +
+            '1. 현재 브라우저 주소창 맨 오른쪽 끝을 확인해 주세요.<br>' +
+            '2. 모니터 모양 또는 더하기(+)가 붙은 <b>[앱 설치 아이콘]</b>을 누르시면 됩니다.<br><br>' +
+            '아이콘이 없다면 <b>우측 상단 메뉴(⋮) ➡️ [저장 및 공유] ➡️ [앱 설치]</b>를 눌러주세요.';
+        }
+      }
+    }
+
+    // 8. GAS(iframe) 신호 대기 리스너 (요청이 올 때만 중앙 모달 띄우기)
     window.addEventListener('message', (event) => {
       if (event.data && event.data.action === 'openInstallModal') {
         
-        // 크롬/웨일 등 자동 설치 기능이 지원되는 환경(deferredPrompt가 존재하는 경우)
+        // 원클릭 자동 설치가 가능한 환경일 때 (크롬, 웨일, 엣지 등 PC/안드로이드)
         if (deferredPrompt) {
-          installBanner.style.display = 'flex'; // GAS 버튼 클릭 시 상단 파란색 배너가 뜸
+          installBanner.style.display = 'flex'; 
         } 
-        // 아이폰 사파리나 인앱 브라우저 등 자동 설치가 안 되는 환경
+        // 자동 설치 인터페이스를 브라우저가 제공하지 않을 때 (아이폰 사파리, 인앱 브라우저 등)
         else {
-          showManualGuide(); // 중앙 수동 가이드 모달 팝업이 뜸
+          showManualGuide(); 
         }
         
       }
