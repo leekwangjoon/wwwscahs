@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>순천청암고등학교 CLOUD SERVICE</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #f8f9fa; }
+    
+    /* 구글 웹앱 주소 프레임 */
+    #gas-frame { width: 100%; height: 100%; border: none; display: block; }
 
+    /* 자동 설치 알림 배너 */
+    #install-banner { position: fixed; top: 0; left: 0; width: 100%; background: #4A90E2; color: white; padding: 12px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; z-index: 99999; justify-content: center; align-items: center; gap: 20px; font-family: sans-serif; font-size: 15px; box-sizing: border-box; }
+    #install-btn { background: white; color: #4A90E2; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: nowrap; transition: 0.2s; }
+    #install-btn:hover { background: #f1f1f1; }
+
+    /* 수동 설치 안내 모달 (플로팅 팝업) */
+    #manual-guide-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(2px); font-family: sans-serif; }
+    .modal-content { background: white; padding: 25px; border-radius: 16px; max-width: 400px; width: 100%; line-height: 1.6; font-size: 15px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-content b { color: #4A90E2; }
+    .close-modal-btn { display: block; width: 100%; margin-top: 20px; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <div id="install-banner">
+    <span id="banner-text">🖥️ <b>순천청암고 클라우드</b>를 설치하여 편리하게 이용해 보세요!</span>
+    <button id="install-btn">지금 설치하기</button>
+  </div>
+
+  <div id="manual-guide-modal">
+    <div class="modal-content">
+      <p id="guideMessage" style="margin: 0;"></p>
+      <button class="close-modal-btn" onclick="document.getElementById('manual-guide-modal').style.display='none'">확인 후 닫기</button>
+    </div>
+  </div>
+
+  <iframe id="gas-frame" src="https://script.google.com/macros/s/AKfycbwapsNEz-lOBVdo5JixbKYoGj6d9m55D8Xm3lTY93gwNkrtNMJ5gMnkkEx0h4Tae8LBlA/exec"></iframe>
+  
+
+  <script>
+    // 1. PWA 단독 앱(Standalone) 모드로 실행된 경우 리다이렉트
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      window.location.href = 'https://scahs.kr';
+    }
+
+    // 2. 서비스 워커 등록
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('서비스 워커 등록 성공:', reg))
+          .catch(err => console.log('서비스 워커 등록 실패:', err));
+      });
+    }
+
+    // 3. 디바이스 및 브라우저 분석 함수
+    function analyzeBrowser() {
+      const ua = navigator.userAgent.toLowerCase();
+      return {
+        isMobile: /iphone|ipad|ipod|android/.test(ua),
+        isIOS: /iphone|ipad|ipod/.test(ua),
+        isAndroid: /android/.test(ua),
+        isSamsung: /samsungbrowser/.test(ua),
+        isFirefox: /firefox|fxios/.test(ua),
+        isSafari: /safari/.test(ua) && !/chrome|crios|edg|samsungbrowser|naver|kakao/.test(ua),
+        isInApp: /kakao|naver|fbav|line/.test(ua)
+      };
+    }
+
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('install-banner');
+    const installBtn = document.getElementById('install-btn');
+    const bannerText = document.getElementById('banner-text');
+    const manualGuideModal = document.getElementById('manual-guide-modal');
+    const guideMessage = document.getElementById('guideMessage');
+
+    // 4. 설치 준비 완료 이벤트 (자동 버튼 표출)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      const browser = analyzeBrowser();
+
+      // 인앱 브라우저가 아닐 때 배너 띄우기
+      if (!browser.isInApp) {
+        installBanner.style.display = 'flex';
+        
+        // 기기별 배너 문구 & 버튼 텍스트 변경
+        if (browser.isMobile) {
+          bannerText.innerHTML = '📱 <b>순천청암고 클라우드</b>를 핸드폰 홈 화면에 앱으로 설치하세요!';
+          installBtn.innerText = '앱 설치하기';
+        } else {
+          bannerText.innerHTML = '💻 <b>순천청암고 클라우드</b>를 바탕화면에 바로가기로 설치하세요!';
+          installBtn.innerText = '바로가기 설치';
+        }
+      }
+    });
+
+    // 5. 배너 설치 버튼 클릭 동작
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        try {
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            installBanner.style.display = 'none';
+          }
+        } catch (error) {
+          console.error("설치 중 오류 발생:", error);
+        }
+        deferredPrompt = null;
+      } else {
+        // 비정상적인 상황(프롬프트 유실 등)에서 백업으로 수동 모달 띄우기
+        installBanner.style.display = 'none';
+        showManualGuide();
+      }
+    });
+
+    // 6. 설치 완료 이벤트
+    window.addEventListener('appinstalled', () => {
+      installBanner.style.display = 'none';
+      manualGuideModal.style.display = 'none';
+      const browser = analyzeBrowser();
+      if (browser.isMobile) {
+        alert('홈 화면에 순천청암고 앱이 성공적으로 설치되었습니다!');
+      } else {
+        alert('바탕화면에 순천청암고 바로가기가 성공적으로 설치되었습니다!');
+      }
+    });
+
+    // 7. 수동 설치 안내 모달 콘텐츠 생성 및 표출 함수
+    function showManualGuide() {
+      const browser = analyzeBrowser();
+      manualGuideModal.style.display = 'flex'; // 모달 열기
+
+      // 모바일 환경
+      if (browser.isMobile) {
+        if (browser.isInApp) {
+          guideMessage.innerHTML = '⚠️ <b>현재 카카오톡 등 앱 내부 브라우저입니다.</b><br><br>오른쪽 위 메뉴(⋮ 또는 ⋯)를 눌러 <b>"다른 브라우저로 열기"</b>를 선택하시면 홈 화면에 바로 설치 버튼이 나타납니다.';
+        } else if (browser.isIOS) {
+          if (browser.isSafari) {
+            guideMessage.innerHTML = '🍏 <b>아이폰 사파리 앱 추가</b><br><br>1. 하단 중앙의 <b>[공유하기]</b> 버튼(네모 박스 화살표)을 누릅니다.<br>2. 메뉴를 아래로 내려 <b>[홈 화면에 추가]</b>를 눌러주세요.';
+          } else {
+            guideMessage.innerHTML = '🍏 <b>아이폰 크롬/엣지 앱 추가</b><br><br>1. 주소창 주변의 <b>[공유하기]</b> 버튼을 누릅니다.<br>2. <b>[홈 화면에 추가]</b>를 선택해 주세요.';
+          }
+        } else if (browser.isSamsung) {
+          guideMessage.innerHTML = '📱 <b>삼성 인터넷 앱 추가</b><br><br>화면 우측 하단 메뉴(三) ➡️ <b>[현재 페이지 추가]</b> ➡️ <b>[홈 화면]</b>을 선택해 주세요.';
+        } else if (browser.isFirefox) {
+          guideMessage.innerHTML = '🦊 <b>파이어폭스 앱 추가</b><br><br>우측 하단 메뉴(⋮)를 누른 뒤 <b>[홈 화면에 추가]</b>를 눌러주세요.';
+        } else {
+          guideMessage.innerHTML = '📱 <b>핸드폰 홈 화면에 앱 추가</b><br><br>브라우저 메뉴에서 <b>[홈 화면에 추가]</b> 또는 <b>[바로가기 만들기]</b>를 선택해 주세요.';
+        }
+      } 
+      // PC 환경
+      else {
+        if (browser.isFirefox) {
+          guideMessage.innerHTML = '🌐 <b>PC 파이어폭스 안내</b><br><br>파이어폭스는 바탕화면 바로가기 자동 설치를 지원하지 않습니다.<br><b>구글 크롬(Chrome)</b> 또는 <b>MS 엣지(Edge)</b>로 접속하시면 원클릭 설치가 가능합니다.';
+        } else {
+          guideMessage.innerHTML = '🌐 <b>바탕화면에 바로가기를 만드려면?</b><br><br>' +
+            '1. 현재 브라우저 주소창 맨 오른쪽 끝을 확인해 주세요.<br>' +
+            '2. 모니터 모양 또는 더하기(+)가 붙은 <b>[앱 설치 아이콘]</b>을 누르시면 됩니다.<br><br>' +
+            '아이콘이 없다면 <b>우측 상단 메뉴(⋮) ➡️ [저장 및 공유] ➡️ [앱 설치]</b>를 눌러주세요.';
+        }
+      }
+    }
+
+    // 8. 초기 접속 시 자동 설치 지원 안 되는 환경 (인앱, 아이폰 등) 모달 표출 대기
+    window.addEventListener('DOMContentLoaded', () => {
+      // 이미 앱으로 실행된 경우(standalone) 방해하지 않음
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) return;
+
+      setTimeout(() => {
+        // 배너가 안 떴다면 (자동설치 불가 환경) 수동 모달 표출
+        if (installBanner.style.display !== 'flex') {
+          showManualGuide();
+        }
+      }, 1500); // 시스템 딜레이 확보 (1.5초)
+    });
+  </script>
+</body>
+</html>
