@@ -196,11 +196,11 @@
             guideMessage.innerHTML = '🍏 <b>아이폰 크롬/엣지 앱 추가</b><br><br>1. 주소창 주변의 <b>[공유하기]</b> 버튼을 누릅니다.<br>2. <b>[홈 화면에 추가]</b>를 선택해 주세요.';
           }
         } else if (browser.isSamsung) {
-          guideMessage.innerHTML = '📱 <b>삼성 인터넷 앱 추가</b><br><br>화면 우측 하단 메뉴(三) ➡️ <b>[현재 페이지 추가]</b> ➡️ <b>[홈 화면]</b>을 선택해 주세요.';
+          guideMessage.innerHTML = '📱 <b>삼성 인터넷 앱 추가(자동설치불가시)</b><br><br>화면 우측 하단 메뉴(三) ➡️ <b>[현재 페이지 추가]</b> ➡️ <b>[홈 화면]</b>을 선택해 주세요.';
         } else if (browser.isFirefox) {
-          guideMessage.innerHTML = '🦊 <b>파이어폭스 앱 추가</b><br><br>우측 하단 메뉴(⋮)를 누른 뒤 <b>[홈 화면에 추가]</b>를 눌러주세요.';
+          guideMessage.innerHTML = '🦊 <b>파이어폭스 앱 추가(자동설치불가시)</b><br><br>우측 하단 메뉴(⋮)를 누른 뒤 <b>[홈 화면에 추가]</b>를 눌러주세요.';
         } else {
-          guideMessage.innerHTML = '📱 <b>핸드폰 홈 화면에 앱 추가</b><br><br>브라우저 메뉴에서 <b>[홈 화면에 추가]</b> 또는 <b>[바로가기 만들기]</b>를 선택해 주세요.';
+          guideMessage.innerHTML = '📱 <b>핸드폰 홈 화면에 앱 추가(자동설치불가시)</b><br><br>브라우저 메뉴에서 <b>[홈 화면에 추가]</b> 또는 <b>[바로가기 만들기]</b>를 선택해 주세요.';
         }
       } 
       // PC 환경 수동 안내 문구
@@ -208,7 +208,7 @@
         if (browser.isFirefox) {
           guideMessage.innerHTML = '🌐 <b>PC 파이어폭스 안내</b><br><br>파이어폭스는 바탕화면 바로가기 자동 설치를 지원하지 않습니다.<br><b>구글 크롬(Chrome)</b> 또는 <b>MS 엣지(Edge)</b>로 접속하시면 원클릭 설치가 가능합니다.';
         } else {
-          guideMessage.innerHTML = '🌐 <b>바탕화면에 바로가기를 만드려면?</b><br><br>' +
+          guideMessage.innerHTML = '🌐 <b>바탕화면에 바로가기를 만드려면(자동설치불가시)?</b><br><br>' +
             '1. 현재 브라우저 주소창 맨 오른쪽 끝을 확인해 주세요.<br>' +
             '2. 모니터 모양 또는 더하기(+)가 붙은 <b>[앱 설치 아이콘]</b>을 누르시면 됩니다.<br><br>' +
             '아이콘이 없다면 <b>우측 상단 메뉴(⋮) ➡️ [저장 및 공유] ➡️ [앱 설치]</b>를 눌러주세요.';
