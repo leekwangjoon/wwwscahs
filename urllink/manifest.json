@@ -1,7 +1,7 @@
 {
   "name": "순천청암고등학교 CLOUD SERVICE",
   "short_name": "청암고 클라우드",
-  "start_url": "https://www.scahs.kr",
+  "start_url": "https://scahs.kr",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
