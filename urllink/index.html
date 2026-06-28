@@ -41,8 +41,6 @@
   
 
   <script>
-
-   
     // 1. PWA 단독 앱(Standalone) 모드로 실행된 경우 리다이렉트
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
       window.location.href = 'https://scahs.kr';
@@ -78,7 +76,7 @@
     const manualGuideModal = document.getElementById('manual-guide-modal');
     const guideMessage = document.getElementById('guideMessage');
 
-    // 4. 설치 준비 완료 이벤트 (자동 버튼 표출)
+    // 4. 설치 준비 완료 이벤트 (자동 버튼 표출 - 지원 브라우저용)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -114,7 +112,6 @@
         }
         deferredPrompt = null;
       } else {
-        // 비정상적인 상황(프롬프트 유실 등)에서 백업으로 수동 모달 띄우기
         installBanner.style.display = 'none';
         showManualGuide();
       }
@@ -168,17 +165,12 @@
       }
     }
 
-    // 8. 초기 접속 시 자동 설치 지원 안 되는 환경 (인앱, 아이폰 등) 모달 표출 대기
-    window.addEventListener('DOMContentLoaded', () => {
-      // 이미 앱으로 실행된 경우(standalone) 방해하지 않음
-      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) return;
-
-      setTimeout(() => {
-        // 배너가 안 떴다면 (자동설치 불가 환경) 수동 모달 표출
-        if (installBanner.style.display !== 'flex') {
-          showManualGuide();
-        }
-      }, 1500); // 시스템 딜레이 확보 (1.5초)
+    // [수정] 8. GAS(iframe) 신호 대기 리스너 (기존 자동 실행 타이머 완전 제거)
+    window.addEventListener('message', (event) => {
+      // GAS에서 보낸 action 값이 'openInstallModal'일 때만 모달 창을 띄웁니다.
+      if (event.data && event.data.action === 'openInstallModal') {
+        showManualGuide();
+      }
     });
   </script>
 </body>
