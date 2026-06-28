@@ -2,33 +2,23 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>순천청암고등학교 CLOUD SERVICE</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
-    #app-container { width: 100%; min-height: 80vh; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    /* 화면을 꽉 채우도록 설정 */
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+    #gas-frame { 
+      width: 100%; 
+      height: 100%; 
+      border: none; 
+      display: block; 
+    }
   </style>
 </head>
 <body>
 
-  <div id="app-container">
-    <p>데이터를 불러오는 중입니다...</p>
-  </div>
+  <iframe id="gas-frame" src="https://script.google.com/macros/s/AKfycbzhu3NyiImcAjSPr1NNgQfhJxf_oknHlFbG8psxVJRxY1yYHY9ulNcQnN0MNLUqgAzZ/exec"></iframe>
 
-  <script>
-    // 여기에 본인의 GAS 배포 주소를 입력하세요
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzhu3NyiImcAjSPr1NNgQfhJxf_oknHlFbG8psxVJRxY1yYHY9ulNcQnN0MNLUqgAzZ/exec';
-
-    async function loadContent() {
-      try {
-        const response = await fetch(GAS_URL);
-        const data = await response.text();
-        document.getElementById('app-container').innerHTML = data;
-      } catch (err) {
-        document.getElementById('app-container').innerHTML = '서비스를 불러올 수 없습니다.';
-      }
-    }
-    loadContent();
-  </script>
 </body>
 </html>
