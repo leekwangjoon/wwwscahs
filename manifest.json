@@ -1,7 +1,7 @@
 {
   "name": "순천청암고 클라우드",
   "short_name": "청암클라우드",
-  "start_url": "/",
+  "start_url": "/",  /* 👈 기존 https://scahs.kr 대신 '/' 또는 '/index.html' 로 수정 */
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
