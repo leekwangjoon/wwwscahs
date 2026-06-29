@@ -80,11 +80,6 @@
 </head>
 <body>
 
-  <div id="loading-screen">
-    <div class="spinner"></div>
-    <div class="loading-text">클라우드 서비스 연결 중...</div>
-  </div>
-
   <div id="install-banner" class="modal-overlay">
     <div class="modal-content">
       <p id="banner-text" style="margin: 0 0 20px 0; font-size: 16px;"></p>
@@ -100,22 +95,64 @@
     </div>
   </div>
 
+
+  <div id="loading-screen" style="display: flex !important; opacity: 1 !important;">
+    <div class="spinner"></div>
+    <div class="loading-text">클라우드 서비스 연결 중...</div>
+  </div>
+  
+  <iframe id="gas-frame" src="https://script.google.com/macros/s/AKfycbzhu3NyiImcAjSPr1NNgQfhJxf_oknHlFbG8psxVJRxY1yYHY9ulNcQnN0MNLUqgAzZ/exec"></iframe>  
+
+  <!--
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-text">클라우드 서비스 연결 중...</div>
+  </div>
+  
   <iframe id="gas-frame" 
           src="https://script.google.com/macros/s/AKfycbzhu3NyiImcAjSPr1NNgQfhJxf_oknHlFbG8psxVJRxY1yYHY9ulNcQnN0MNLUqgAzZ/exec"
           onload="hideLoadingScreen()">
   </iframe>
+  -->
 
+
+
+
+  
   <script>
-    // 4. iframe 로드 완료 시 로딩 화면 제거 함수
+
+    // iframe 요소 감지 및 로드 완료 이벤트 바인딩
+    const frame = document.getElementById('gas-frame');
+    if (frame) {
+      frame.addEventListener('load', hideLoadingScreen);
+    }
+  
     function hideLoadingScreen() {
       const loader = document.getElementById('loading-screen');
       if (loader) {
-        loader.style.opacity = '0'; // 부드럽게 투명해짐
+        loader.style.setProperty('opacity', '0', 'important'); // 부드럽게 숨기기
         setTimeout(() => {
-          loader.style.display = 'none'; // 완전히 제거
-        }, 500); // 0.5초 뒤 완벽히 숨김
+          loader.style.setProperty('display', 'none', 'important'); // 완벽 제거
+        }, 500);
       }
     }
+    
+    // 만약 7초 이상 iframe이 안 꺼지면 강제로 로딩창을 걷어내는 안전장치 추가
+    setTimeout(hideLoadingScreen, 7000);
+
+
+
+    
+    // 4. iframe 로드 완료 시 로딩 화면 제거 함수
+    //function hideLoadingScreen() {
+    //  const loader = document.getElementById('loading-screen');
+    //  if (loader) {
+    //    loader.style.opacity = '0'; // 부드럽게 투명해짐
+    //    setTimeout(() => {
+    //      loader.style.display = 'none'; // 완전히 제거
+    //    }, 500); // 0.5초 뒤 완벽히 숨김
+    //  }
+    //}
 
     // 서비스 워커 등록
     if ('serviceWorker' in navigator) {
