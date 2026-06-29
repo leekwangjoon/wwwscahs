@@ -1,7 +1,9 @@
 const CACHE_NAME = 'scahs-v1';
 const ASSETS = [
   '/',
-  '/index.html'
+  '/index.html',
+  '/manifest.json', // 👈 매니페스트 파일도 캐시 목록에 추가하는 것을 권장합니다.
+  '/icon.png'        // 👈 앱 아이콘도 등록해 두면 안전합니다.
 ];
 
 self.addEventListener('install', (e) => {
