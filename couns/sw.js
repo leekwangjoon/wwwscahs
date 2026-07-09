@@ -1,7 +1,6 @@
 
 
 
-
 // sw.js 파일 내용
 const CACHE_NAME = 'scahscouns-v5'; // 👈 버전을 v1에서 v2로 변경하여 강제 업데이트 유도
 const ASSETS = [
